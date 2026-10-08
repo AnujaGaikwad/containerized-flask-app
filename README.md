@@ -1,162 +1,152 @@
-Containerized Flask API on AWS ECS
-
-A simple Flask REST API containerized with Docker, stored in Amazon ECR, and deployed on Amazon ECS using AWS Fargate. Amazon CloudWatch Logs is used for application monitoring.
-
-Project Overview
-
-This project demonstrates a complete container deployment workflow:
-
+🚀 Containerized Flask API on AWS ECS
+A production-style container deployment project that demonstrates how to package a Python Flask REST API with Docker, store the container image in Amazon ECR, and deploy it on Amazon ECS using AWS Fargate, with application logs collected in Amazon CloudWatch.
+🎯 Project Overview
+This project demonstrates an end-to-end container deployment workflow:
 Flask API → Docker → Amazon ECR → Amazon ECS Fargate → CloudWatch Logs
-
-The API provides three endpoints:
-
-\- / — Returns the application status message
-
-\- /health — Health endpoint
-
-\- /api/info — Returns application and environment information
-
-AWS Services Used
-
-\- Amazon ECR — Stores the Docker container image
-
-\- Amazon ECS — Runs and manages the container
-
-\- AWS Fargate — Provides serverless container compute
-
-\- Amazon CloudWatch Logs — Collects application logs
-
-\- IAM — Provides the ECS task execution role
-
-Project Structure
-
-containerized-flask-app/
-
-├── architecture/
-
-├── screenshots/
-
-├── .dockerignore
-
-├── .gitignore
-
-├── app.py
-
-├── Dockerfile
-
-├── requirements.txt
-
-└── README.md
-
+The application exposes three lightweight REST endpoints for application status, health monitoring, and environment information.
 API Endpoints
-
 Endpoint	Purpose
-
-/	Application status
-
-/health	Health check
-
-/api/info	Application information
+/	Returns application status
+/health	Returns API health status
+/api/info	Returns application and environment information
 
 
+☁️ AWS Services Used
+AWS Service	Purpose
+Amazon ECR	Stores and manages the Docker container image
+Amazon ECS	Runs and manages the containerized application
+AWS Fargate	Provides serverless compute for the ECS task
+Amazon CloudWatch Logs	Collects and monitors application logs
+AWS IAM	Provides the ECS task execution role
 
 
-
-Docker Setup
-
-Build the Docker image:
-
+📁 Project Structure
+containerized-flask-app/
+│
+├── architecture/
+│   └── mermaid-diagram.png
+│
+├── screenshots/
+│   ├── 01-flask-local.png
+│   ├── 03-docker-container.png
+│   ├── 04-docker-health.png
+│   ├── 05-ecr-push.png
+│   ├── 06-ecr-image.png
+│   ├── 07-ecs-cluster.png
+│   ├── 09-cloudwatch-log-group.png
+│   ├── 11-ecs-live-api.png
+│   └── 12-cloudwatch-logs.png
+│
+├── .dockerignore
+├── .gitignore
+├── app.py
+├── Dockerfile
+├── requirements.txt
+└── README.md
+🐍 Application
+The API is built with Python and Flask and runs on port 5000 inside the container.
+The application uses an environment variable named APP_ENV to demonstrate environment-specific configuration.
+Default production configuration:
+APP_ENV=production
+🐳 Docker
+Build the Docker Image
 docker build -t cloudops-flask-api .
-
-Run the container locally:
-
+Run Locally
 docker run -d -p 5002:5000 --name cloudops-flask-api cloudops-flask-api
-
-The API is then available at:
-
+The host uses port 5002 because port 5000 was already being used by another local application.
+Test the API
 http://localhost:5002/
-
 http://localhost:5002/health
-
 http://localhost:5002/api/info
+📦 Amazon ECR
+The Docker image is stored in a private Amazon ECR repository.
+ECR Repository
+cloudops-flask-api
+Image URI
+669828370396.dkr.ecr.ap-south-1.amazonaws.com/cloudops-flask-api
+Tag the Image
+docker tag cloudops-flask-api:latest 669828370396.dkr.ecr.ap-south-1.amazonaws.com/cloudops-flask-api:latest
+Push the Image
+docker push 669828370396.dkr.ecr.ap-south-1.amazonaws.com/cloudops-flask-api:latest
+🚀 Amazon ECS Fargate Deployment
+The container was deployed to Amazon ECS using AWS Fargate.
+ECS Configuration
+Configuration	Value
+Cluster	cloudops-flask-cluster
+Service	cloudops-flask-service
+Task Definition	cloudops-flask-task
+Launch Type	Fargate
+Container Port	5000
+CPU	0.25 vCPU
+Memory	0.5 GiB
+Platform	Linux / X86_64
+Network Mode	awsvpc
 
-Amazon ECR Deployment
 
-The Docker image is tagged with the ECR repository URI and pushed to Amazon ECR.
-
-docker tag cloudops-flask-api:latest <ECR-REPOSITORY-URI>:latest
-
-docker push <ECR-REPOSITORY-URI>:latest
-
-Amazon ECS Deployment
-
-The application is deployed using:
-
-\- ECS Cluster: cloudops-flask-cluster
-
-\- ECS Service: cloudops-flask-service
-
-\- Task Definition: cloudops-flask-task
-
-\- Launch Type: Fargate
-
-\- Container Port: 5000
-
-\- CPU: 0.25 vCPU
-
-\- Memory: 0.5 GiB
-
-The ECS service runs one task using the Docker image stored in Amazon ECR.
-
-CloudWatch Logging
-
-Application logs are sent to the CloudWatch log group:
-
+The ECS task pulls the Docker image from Amazon ECR and runs the Flask API as a Fargate task.
+📊 CloudWatch Logging
+Application logs are sent to:
 /cloudops/flask-api
+CloudWatch captured:
+- Flask application startup
+- Incoming API requests
+- HTTP response status codes
+- Application runtime information
+Example successful requests included:
+GET / HTTP/1.1 → 200
+GET /health HTTP/1.1 → 200
+GET /api/info HTTP/1.1 → 200
+This confirms that the deployed application was receiving requests successfully and that ECS-to-CloudWatch logging was working.
+🖼️ Screenshots
+The screenshots/ directory contains project evidence covering:
+1. Local Flask application
+2. Docker container
+3. Docker API/health testing
+4. ECR image push
+5. ECR repository image
+6. ECS cluster
+7. CloudWatch log group
+8. Live ECS API
+9. CloudWatch application logs
+🏗️ Architecture
+The project architecture is available separately in:
+architecture/mermaid-diagram.png
+Workflow
+Developer
+   ↓
+Flask REST API
+   ↓
+Docker Image
+   ↓
+Amazon ECR
+   ↓
+Amazon ECS Fargate
+   ↓
+CloudWatch Logs
+🎤 Interview Explanation
+I developed a Flask REST API and containerized it using Docker. I pushed the Docker image to Amazon ECR and deployed it on Amazon ECS using Fargate. I configured CloudWatch Logs for application monitoring and tested the deployed API using health and information endpoints.
 
-The logs confirm that the Flask application starts successfully and that the API endpoints return successful HTTP responses.
-
-Screenshots
-
-Project evidence is available in the screenshots/ directory, including:
-
-\- Local Flask application
-
-\- Docker container
-
-\- Docker health/API testing
-
-\- ECR image push
-
-\- ECR repository image
-
-\- ECS cluster
-
-\- CloudWatch log group
-
-\- Live ECS API
-
-\- CloudWatch application logs
-
-Interview Explanation
-
-I developed a Flask REST API, containerized it using Docker, pushed the Docker image to Amazon ECR, and deployed the container on Amazon ECS using Fargate. I configured CloudWatch Logs for monitoring and exposed health and API endpoints for testing.
-
-
-
-One-line Architecture
-
+One-Line Explanation
 Flask → Docker → ECR → ECS Fargate → CloudWatch
-
-Future Improvements
-
-\- Use Gunicorn instead of Flask's development server
-
-\- Add an Application Load Balancer
-
-\- Add HTTPS using AWS Certificate Manager
-
-\- Add CI/CD using AWS CodePipeline and CodeBuild
-
-\- Deploy the application in private subnets with production-grade networking
-
+🔮 Future Improvements
+- Replace Flask's development server with Gunicorn
+- Add an Application Load Balancer
+- Enable HTTPS using AWS Certificate Manager
+- Implement CI/CD using AWS CodePipeline and CodeBuild
+- Deploy using private subnets and production-grade networking
+- Add ECS container health checks
+- Add automated deployment and monitoring
+📚 Key Learnings
+- Building REST APIs with Flask
+- Creating optimized Docker images
+- Running containers locally
+- Publishing images to Amazon ECR
+- Deploying containers using Amazon ECS Fargate
+- Configuring ECS task execution roles
+- Configuring CloudWatch container logging
+- Testing and monitoring a deployed containerized application
+- Managing AWS resources and cleaning up cost-incurring resources
+👩‍💻 Author
+Anuja Gaikwad
+Python Developer | AWS | AI & Automation
+GitHub: AnujaGaikwad
